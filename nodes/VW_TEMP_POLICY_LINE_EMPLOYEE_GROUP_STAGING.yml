@@ -1,0 +1,70 @@
+fileVersion: 1
+id: 5743b17c-a459-4f7f-94de-50f968c3e808
+name: VW_TEMP_POLICY_LINE_EMPLOYEE_GROUP_STAGING
+operation:
+  config:
+    insertStrategy: INSERT
+    postSQL: ""
+    preSQL: ""
+    testsEnabled: true
+    truncateBefore: true
+  database: ""
+  deployEnabled: true
+  description: ""
+  isMultisource: false
+  locationName: DBSHIFT
+  materializationType: view
+  metadata:
+    appliedNodeTests: []
+    columns:
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: e43a17e1-8874-42b7-a36c-9c748c82ab4d
+          stepCounter: 5743b17c-a459-4f7f-94de-50f968c3e808
+        config: {}
+        dataType: VARCHAR
+        description: ""
+        name: UNIQLINE
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: b1d3e5f2-9c8a-4b6d-a2c4-7e9f8a6b5c4d
+                stepCounter: 3c552386-8f37-4384-a14a-73d2a02242e9
+            transform: src.UNIQLINE
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: 63584852-c0e9-4e02-b2fa-b7a42b08a958
+          stepCounter: 5743b17c-a459-4f7f-94de-50f968c3e808
+        config: {}
+        dataType: VARCHAR
+        description: ""
+        name: STUFF_STRING
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: c3f5g7h4-a1b2-3c4d-5e6f-8g9h1i2j3k4l
+                stepCounter: 3c552386-8f37-4384-a14a-73d2a02242e9
+            transform: src.STUFF_STRING
+    cteString: ""
+    enabledColumnTestIDs: []
+    sourceMapping:
+      - aliases:
+          DW_POLICY_LINE_EMPLOYEE_GROUP_STAGING: src
+        customSQL:
+          customSQL: ""
+        dependencies:
+          - locationName: DBSHIFT
+            nodeName: DW_POLICY_LINE_EMPLOYEE_GROUP_STAGING
+        join:
+          joinCondition: |-
+            FROM {{ ref('DBSHIFT', 'DW_POLICY_LINE_EMPLOYEE_GROUP_STAGING') }} AS src
+            GROUP BY src.UNIQLINE, src.STUFF_STRING
+        name: VW_TEMP_POLICY_LINE_EMPLOYEE_GROUP_STAGING
+        noLinkRefs: []
+  name: VW_TEMP_POLICY_LINE_EMPLOYEE_GROUP_STAGING
+  overrideSQL: false
+  schema: ""
+  sqlType: View
+  type: sql
+  version: 1
+type: Node

@@ -1,0 +1,35 @@
+fileVersion: 1
+id: 9a5b3a88-251f-4952-b1fd-1a851eb336c1
+name: DW_POLICY_LINE_STATUS_GROUP
+operation:
+  database: ""
+  deployEnabled: true
+  description: ""
+  locationName: DBSHIFT
+  metadata:
+    columns:
+      - acceptedValues:
+          strictMatch: true
+          values: []
+        appliedColumnTests: {}
+        columnReference:
+          columnCounter: a3a6b6c2-1b15-461b-9076-7ac93566144e
+          stepCounter: 9a5b3a88-251f-4952-b1fd-1a851eb336c1
+        config: {}
+        dataType: VARCHAR
+        defaultValue: ""
+        description: ""
+        name: LINE_STATUS_CODE
+        nullable: true
+        primaryKey: false
+        sourceColumnReferences:
+          - columnReferences: []
+            transform: ""
+        transform: ""
+        uniqueKey: false
+  name: DW_POLICY_LINE_STATUS_GROUP
+  schema: ""
+  sqlType: Source
+  type: sourceInput
+  version: 1
+type: Node

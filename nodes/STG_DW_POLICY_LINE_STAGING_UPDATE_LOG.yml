@@ -1,0 +1,176 @@
+fileVersion: 1
+id: 66a6a235-97e2-4752-944d-5c8297f0a997
+name: STG_DW_POLICY_LINE_STAGING_UPDATE_LOG
+operation:
+  config:
+    insertStrategy: INSERT
+    postSQL: ""
+    preSQL: |-
+      BEGIN
+        USE DATABASE ALLIANT_DW_STAGE;
+        UPDATE ALLIANT_DW_STAGE.DBO.DW_POLICY_LINE_STAGING AS p
+        SET STUFF_STRING = t.STUFF_STRING
+        FROM {{ ref('DBSHIFT', 'VW_TEMP_POLICY_LINE_EMPLOYEE_GROUP_STAGING') }} AS t
+        WHERE p.UNIQLINE = t.UNIQLINE;
+
+        UPDATE ALLIANT_DW_STAGE.DBO.DW_POLICY_LINE_STAGING AS ps
+        SET
+            POLICY_LINE_TYPE_CODE = source.new_policy_line_type_code,
+            POLICY_LINE_TYPE = source.new_policy_line_type,
+            FEE_LINE_FLAG = source.new_fee_line_flag,
+            LINE_TYPE_CLASSIFICATION_CODE = source.new_line_type_classification_code,
+            LINE_TYPE_CLASSIFICATION = source.new_line_type_classification,
+            DW_LINE_TYPE_CATEGORY = source.new_dw_line_type_category,
+            LINE_TYPE_OF_BUSINESS_CODE = source.new_line_type_of_business_code,
+            LINE_TYPE_OF_BUSINESS = source.new_line_type_of_business,
+            DW_CLIENT_MASTER_ID = source.new_dw_client_master_id,
+            DW_CLIENT_ID = source.new_dw_client_id,
+            DW_POLICY_ID = source.new_dw_policy_id,
+            DW_STRUCTURE_ID = source.new_dw_structure_id,
+            DW_COMPANY_ID_ISSUING = source.new_dw_company_id_issuing,
+            DW_COMPANY_ID_BILLING = source.new_dw_company_id_billing,
+            BILLMODE = source.new_BillMode,
+            PPETYPE = source.new_PPEType,
+            DW_POLICY_LINE_EMPLOYEE_GROUP_NUMBER = source.new_dw_policy_line_employee_group_number,
+            DW_DATE_UPDATED = CURRENT_TIMESTAMP(),
+            DW_UPDATE_USER = 'spdw_dw_policy_line_staging_update'
+        FROM (
+            SELECT
+                ps_inner.UNIQLINE,
+                eplt.POLICY_LINE_TYPE_CODE AS new_policy_line_type_code,
+                eplt.POLICY_LINE_TYPE AS new_policy_line_type,
+                eplt.FEE_POLICY_FLAG AS new_fee_line_flag,
+                eplt.POLICY_LINE_TYPE_CLASSIFICATION_CODE AS new_line_type_classification_code,
+                eplt.POLICY_LINE_TYPE_CLASSIFICATION AS new_line_type_classification,
+                COALESCE(eplt.DW_POLICY_LINE_TYPE_CATEGORY, 'Unknown') AS new_dw_line_type_category,
+                eplt.TYPE_OF_BUSINESS_CODE AS new_line_type_of_business_code,
+                eplt.TYPE_OF_BUSINESS AS new_line_type_of_business,
+                COALESCE(cc.DW_CLIENT_MASTER_ID, -1) AS new_dw_client_master_id,
+                COALESCE(cc.DW_CLIENT_ID, -1) AS new_dw_client_id,
+                COALESCE(p.DW_POLICY_ID, -1) AS new_dw_policy_id,
+                COALESCE(s.DW_STRUCTURE_ID, -1) AS new_dw_structure_id,
+                COALESCE(ci.DW_COMPANY_ID, -1) AS new_dw_company_id_issuing,
+                COALESCE(cb.DW_COMPANY_ID, -1) AS new_dw_company_id_billing,
+                CASE
+                    WHEN ps_inner.BILLMODECODE = 'A' THEN 'Agency Bill'
+                    WHEN ps_inner.BILLMODECODE = 'D' THEN 'Direct Bill'
+                END AS new_BillMode,
+                CASE
+                    WHEN ps_inner.PPETYPECODE = 'CA' THEN 'Carrier'
+                    WHEN ps_inner.PPETYPECODE = 'BR' THEN 'Broker External'
+                    WHEN ps_inner.PPETYPECODE = 'IN' THEN 'Broker Internal'
+                    ELSE ps_inner.PPETYPECODE
+                END AS new_PPEType,
+                COALESCE(n.DW_POLICY_LINE_EMPLOYEE_GROUP_NUMBER, -1) AS new_dw_policy_line_employee_group_number
+            FROM {{ ref('DBSHIFT', 'DW_POLICY_LINE_STAGING') }} AS ps_inner
+            LEFT OUTER JOIN {{ ref('DBSHIFT', 'EPIC_POLICY_LINE_TYPE') }} AS eplt ON eplt.SOURCE_SYSTEM_POLICY_LINE_TYPE_ID = ps_inner.UNIQCDPOLICYLINETYPE
+            LEFT OUTER JOIN {{ ref('DBSHIFT', 'DW_COMPANY') }} AS ci ON ps_inner.UNIQENTITYCOMPANYISSUING = ci.SOURCE_COMPANY_UNIQ_ID AND ci.SOURCE_SYSTEM = 'Epic'
+            LEFT OUTER JOIN {{ ref('DBSHIFT', 'DW_COMPANY') }} AS cb ON ps_inner.UNIQENTITYCOMPANYBILLING = cb.SOURCE_COMPANY_UNIQ_ID AND cb.SOURCE_SYSTEM = 'Epic'
+            LEFT OUTER JOIN {{ ref('DBSHIFT', 'DW_POLICY_CURRENT') }} AS p ON ps_inner.UNIQPOLICY = p.SOURCE_SYSTEM_POLICY_ID AND p.SOURCE_SYSTEM = 'Epic'
+            LEFT OUTER JOIN {{ ref('DBSHIFT', 'DW_CLIENT_CURRENT') }} AS cc ON ps_inner.UNIQENTITY = cc.SOURCE_SYSTEM_CLIENT_ID AND cc.SOURCE_SYSTEM = 'Epic'
+            LEFT OUTER JOIN {{ ref('DBSHIFT', 'DW_STRUCTURE_CURRENT') }} AS s ON ps_inner.UNIQAGENCY = s.SOURCE_SYSTEM_UNIQ_AGENCY
+                                    AND ps_inner.UNIQBRANCH = s.SOURCE_SYSTEM_UNIQ_BRANCH
+                                    AND ps_inner.UNIQDEPARTMENT = s.SOURCE_SYSTEM_UNIQ_DEPARTMENT
+                                    AND ps_inner.UNIQPROFITCENTER = s.SOURCE_SYSTEM_UNIQ_PROFIT_CENTER
+            LEFT OUTER JOIN {{ ref('DBSHIFT', 'DW_POLICY_LINE_EMPLOYEE_GROUP_NUMBER') }} AS n ON ps_inner.STUFF_STRING = n.STUFF_STRING
+        ) AS source
+        WHERE ps.UNIQLINE = source.UNIQLINE;
+      END;
+    testsEnabled: true
+    truncateBefore: true
+  database: ETL_LOGGING
+  deployEnabled: true
+  description: ""
+  isMultisource: false
+  locationName: DBSHIFT
+  materializationType: table
+  metadata:
+    appliedNodeTests: []
+    columns:
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: 7bf81079-05f4-41d6-848e-2895690b209e
+          stepCounter: 66a6a235-97e2-4752-944d-5c8297f0a997
+        config: {}
+        dataType: VARCHAR
+        description: ""
+        name: PACKAGE_EXECUTION_GUID
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences: []
+            transform: "'{{ parameters.ExecutionGuid }}'"
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: 1a8c9038-a720-4354-941f-178b598b9e6f
+          stepCounter: 66a6a235-97e2-4752-944d-5c8297f0a997
+        config: {}
+        dataType: VARCHAR
+        description: ""
+        name: MESSAGE
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: 32a03f4f-410a-433b-8534-11a5113d0781
+                stepCounter: f0e4b4d4-6e6e-4c7b-9c7d-5a6b5c4d3e2f
+              - columnCounter: 9345d1f8-067f-4f59-a567-2f3b901a87e5
+                stepCounter: 2824df9c-ec95-468e-a28a-860824b23829
+            transform: '''dw_source_system_id: '' || CAST(s.DW_SOURCE_SYSTEM_ID AS VARCHAR)
+              || '' / '' || pls.LINESTATUSCODE || '' = New Policy Line Status Code.  Check
+              dw_policy_line_status_group'''
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: 232f05eb-6d2c-4b77-a859-9942a78e4775
+          stepCounter: 66a6a235-97e2-4752-944d-5c8297f0a997
+        config: {}
+        dataType: VARCHAR
+        description: ""
+        name: MESSAGE_TYPE
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences: []
+            transform: "'W'"
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: 3b137359-2d50-4d56-b08e-5b1b44b2092c
+          stepCounter: 66a6a235-97e2-4752-944d-5c8297f0a997
+        config: {}
+        dataType: TIMESTAMP_NTZ
+        description: ""
+        name: CREATE_DATE
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences: []
+            transform: CURRENT_TIMESTAMP()
+    cteString: ""
+    enabledColumnTestIDs: []
+    sourceMapping:
+      - aliases:
+          DW_POLICY_LINE_STAGING: pls
+          DW_SOURCE_SYSTEM: s
+          DW_POLICY_LINE_STATUS_GROUP: plsg
+        customSQL:
+          customSQL: ""
+        dependencies:
+          - locationName: DBSHIFT
+            nodeName: DW_POLICY_LINE_STAGING
+          - locationName: DBSHIFT
+            nodeName: DW_SOURCE_SYSTEM
+          - locationName: DBSHIFT
+            nodeName: DW_POLICY_LINE_STATUS_GROUP
+          - locationName: DBSHIFT
+            nodeName: VW_TEMP_POLICY_LINE_EMPLOYEE_GROUP_STAGING
+        join:
+          joinCondition: |-
+            FROM {{ ref('DBSHIFT', 'DW_POLICY_LINE_STAGING') }} AS pls
+            INNER JOIN {{ ref('DBSHIFT', 'DW_SOURCE_SYSTEM') }} AS s ON pls.SOURCE_SYSTEM = s.SOURCE_SYSTEM AND s.AGENCY_COMPANY = 'Alliant'
+            LEFT OUTER JOIN {{ ref('DBSHIFT', 'DW_POLICY_LINE_STATUS_GROUP') }} AS plsg ON pls.LINESTATUSCODE = plsg.LINE_STATUS_CODE
+            WHERE pls.LINESTATUSCODE IS NOT NULL AND plsg.LINE_STATUS_CODE IS NULL
+        name: STG_DW_POLICY_LINE_STAGING_UPDATE_LOG
+        noLinkRefs: []
+  name: ETL_MESSAGE
+  overrideSQL: false
+  schema: DBO
+  sqlType: Stage
+  type: sql
+  version: 1
+type: Node
