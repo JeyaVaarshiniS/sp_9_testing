@@ -1,0 +1,679 @@
+fileVersion: 1
+id: 53c15052-a58d-4226-9d33-4f938d8442a0
+name: DW_CLIENT_BENCHMARKING_POLICY_LINE_LOAD
+operation:
+  config:
+    insertStrategy: INSERT
+    postSQL: |-
+      BEGIN
+        USE DATABASE ALLIANT_DW;
+
+        UPDATE ALLIANT_DW.DBO.DW_CLIENT_BENCHMARKING_POLICY_LINE AS pl
+        SET
+           DW_CLIENT_ID = stg.DW_CLIENT_ID
+          , DW_CLIENT_MASTER_ID = stg.DW_CLIENT_MASTER_ID
+          , DW_POLICY_ID = stg.DW_POLICY_ID
+          , DW_POLICY_LINE_ID = stg.DW_POLICY_LINE_ID
+          , DW_STRUCTURE_ID = stg.DW_STRUCTURE_ID
+          , DW_COMPANY_ID_ISSUING = stg.DW_COMPANY_ID_ISSUING
+          , DW_COMPANY_ID_BILLING = stg.DW_COMPANY_ID_BILLING
+          , DW_DATE_ID_EFFECTIVE_DATE = stg.DW_DATE_ID_EFFECTIVE_DATE
+          , DW_DATE_ID_EXPIRATION_DATE = stg.DW_DATE_ID_EXPIRATION_DATE
+          , POLICY_NUMBER = stg.POLICY_NUMBER
+          , POLICY_NAME = stg.POLICY_NAME
+          , POLICY_EFFECTIVE_DATE = stg.POLICY_EFFECTIVE_DATE
+          , POLICY_EXPIRATION_DATE = stg.POLICY_EXPIRATION_DATE
+          , POLICY_TYPE_CODE = stg.POLICY_TYPE_CODE
+          , POLICY_TYPE = stg.POLICY_TYPE
+          , LINE_TYPE_CODE = stg.LINE_TYPE_CODE
+          , LINE_TYPE = stg.LINE_TYPE
+          , AGGREGATE_LIMIT_AMOUNT = stg.AGGREGATE_LIMIT_AMOUNT
+          , LIMIT_AMOUNT_PER_CLAIM = stg.LIMIT_AMOUNT_PER_CLAIM
+          , EXCESS_LAYER_NUMBER = stg.EXCESS_LAYER_NUMBER
+          , RETENTION_AMOUNT = stg.RETENTION_AMOUNT
+          , SOURCE_SYSTEM_CLIENT_ID = stg.SOURCE_SYSTEM_CLIENT_ID
+          , SOURCE_SYSTEM_POLICY_ID = stg.SOURCE_SYSTEM_POLICY_ID
+          , SOURCE_SYSTEM_ORIGINAL_POLICY_ID = stg.SOURCE_SYSTEM_ORIGINAL_POLICY_ID
+          , SOURCE_SYSTEM_POLICY_TYPE_ID = stg.SOURCE_SYSTEM_POLICY_TYPE_ID
+          , SOURCE_SYSTEM_LINE_TYPE_ID = stg.SOURCE_SYSTEM_LINE_TYPE_ID
+          , SOURCE_SYSTEM_ISSUING_COMPANY_ID = stg.SOURCE_SYSTEM_ISSUING_COMPANY_ID
+          , SOURCE_SYSTEM_BILLING_COMPANY_ID = stg.SOURCE_SYSTEM_BILLING_COMPANY_ID
+          , LINE_STATUS_CODE = stg.LINE_STATUS_CODE
+          , BILLED_COMMISSION = stg.BILLED_COMMISSION
+          , BILLED_PREMIUM = stg.BILLED_PREMIUM
+          , DW_DATE_UPDATED = CURRENT_TIMESTAMP()
+          , DW_UPDATE_USER = 'spdw_dw_client_benchmarking_policy_line_insertUpdate'
+        FROM {{ ref('DBSHIFT', 'DW_CLIENT_BENCHMARKING_POLICY_LINE_STAGING') }} AS stg
+        WHERE stg.SOURCE_SYSTEM_POLICY_LINE_ID = pl.SOURCE_SYSTEM_POLICY_LINE_ID
+        AND
+        (
+          IFF(stg.DW_CLIENT_ID IS NULL, -1, stg.DW_CLIENT_ID) <> IFF(pl.DW_CLIENT_ID IS NULL, -1, pl.DW_CLIENT_ID)
+          OR IFF(stg.DW_CLIENT_MASTER_ID IS NULL, -1, stg.DW_CLIENT_MASTER_ID) <> IFF(pl.DW_CLIENT_MASTER_ID IS NULL, -1, pl.DW_CLIENT_MASTER_ID)
+          OR IFF(stg.DW_POLICY_ID IS NULL, -1, stg.DW_POLICY_ID) <> IFF(pl.DW_POLICY_ID IS NULL, -1, pl.DW_POLICY_ID)
+          OR IFF(stg.DW_POLICY_LINE_ID IS NULL, -1, stg.DW_POLICY_LINE_ID) <> IFF(pl.DW_POLICY_LINE_ID IS NULL, -1, pl.DW_POLICY_LINE_ID)
+          OR IFF(stg.DW_STRUCTURE_ID IS NULL, -1, stg.DW_STRUCTURE_ID) <> IFF(pl.DW_STRUCTURE_ID IS NULL, -1, pl.DW_STRUCTURE_ID)
+          OR IFF(stg.DW_COMPANY_ID_ISSUING IS NULL, -1, stg.DW_COMPANY_ID_ISSUING) <> IFF(pl.DW_COMPANY_ID_ISSUING IS NULL, -1, pl.DW_COMPANY_ID_ISSUING)
+          OR IFF(stg.DW_COMPANY_ID_BILLING IS NULL, -1, stg.DW_COMPANY_ID_BILLING) <> IFF(pl.DW_COMPANY_ID_BILLING IS NULL, -1, pl.DW_COMPANY_ID_BILLING)
+          OR IFF(stg.DW_DATE_ID_EFFECTIVE_DATE IS NULL, -1, stg.DW_DATE_ID_EFFECTIVE_DATE) <> IFF(pl.DW_DATE_ID_EFFECTIVE_DATE IS NULL, -1, pl.DW_DATE_ID_EFFECTIVE_DATE)
+          OR IFF(stg.DW_DATE_ID_EXPIRATION_DATE IS NULL, -1, stg.DW_DATE_ID_EXPIRATION_DATE) <> IFF(pl.DW_DATE_ID_EXPIRATION_DATE IS NULL, -1, pl.DW_DATE_ID_EXPIRATION_DATE)
+          OR IFF(stg.POLICY_NUMBER IS NULL, '-1', stg.POLICY_NUMBER) <> IFF(pl.POLICY_NUMBER IS NULL, '-1', pl.POLICY_NUMBER)
+          OR IFF(stg.POLICY_NAME IS NULL, '-1', stg.POLICY_NAME) <> IFF(pl.POLICY_NAME IS NULL, '-1', pl.POLICY_NAME)
+          OR IFF(stg.POLICY_EFFECTIVE_DATE IS NULL, '1900-01-01'::DATE, stg.POLICY_EFFECTIVE_DATE) <> IFF(pl.POLICY_EFFECTIVE_DATE IS NULL, '1900-01-01'::DATE, pl.POLICY_EFFECTIVE_DATE)
+          OR IFF(stg.POLICY_EXPIRATION_DATE IS NULL, '1900-01-01'::DATE, stg.POLICY_EXPIRATION_DATE) <> IFF(pl.POLICY_EXPIRATION_DATE IS NULL, '1900-01-01'::DATE, pl.POLICY_EXPIRATION_DATE)
+          OR IFF(stg.POLICY_TYPE_CODE IS NULL, '-1', stg.POLICY_TYPE_CODE) <> IFF(pl.POLICY_TYPE_CODE IS NULL, '-1', pl.POLICY_TYPE_CODE)
+          OR IFF(stg.POLICY_TYPE IS NULL, '-1', stg.POLICY_TYPE) <> IFF(pl.POLICY_TYPE IS NULL, '-1', pl.POLICY_TYPE)
+          OR IFF(stg.LINE_TYPE_CODE IS NULL, '-1', stg.LINE_TYPE_CODE) <> IFF(pl.LINE_TYPE_CODE IS NULL, '-1', pl.LINE_TYPE_CODE)
+          OR IFF(stg.LINE_TYPE IS NULL, '-1', stg.LINE_TYPE) <> IFF(pl.LINE_TYPE IS NULL, '-1', pl.LINE_TYPE)
+          OR IFF(stg.LINE_STATUS_CODE IS NULL, '-1', stg.LINE_STATUS_CODE) <> IFF(pl.LINE_STATUS_CODE IS NULL, '-1', pl.LINE_STATUS_CODE)
+          OR IFF(stg.BILLED_COMMISSION IS NULL, -1, stg.BILLED_COMMISSION) <> IFF(pl.BILLED_COMMISSION IS NULL, -1, pl.BILLED_COMMISSION)
+          OR IFF(stg.BILLED_PREMIUM IS NULL, -1, stg.BILLED_PREMIUM) <> IFF(pl.BILLED_PREMIUM IS NULL, -1, pl.BILLED_PREMIUM)
+          OR IFF(stg.AGGREGATE_LIMIT_AMOUNT IS NULL, '-1', stg.AGGREGATE_LIMIT_AMOUNT) <> IFF(pl.AGGREGATE_LIMIT_AMOUNT IS NULL, '-1', pl.AGGREGATE_LIMIT_AMOUNT)
+          OR IFF(stg.LIMIT_AMOUNT_PER_CLAIM IS NULL, '-1', stg.LIMIT_AMOUNT_PER_CLAIM) <> IFF(pl.LIMIT_AMOUNT_PER_CLAIM IS NULL, '-1', pl.LIMIT_AMOUNT_PER_CLAIM)
+          OR IFF(stg.EXCESS_LAYER_NUMBER IS NULL, '-1', stg.EXCESS_LAYER_NUMBER) <> IFF(pl.EXCESS_LAYER_NUMBER IS NULL, '-1', pl.EXCESS_LAYER_NUMBER)
+          OR IFF(stg.RETENTION_AMOUNT IS NULL, '-1', stg.RETENTION_AMOUNT) <> IFF(pl.RETENTION_AMOUNT IS NULL, '-1', pl.RETENTION_AMOUNT)
+          OR IFF(stg.SOURCE_SYSTEM_CLIENT_ID IS NULL, -1, stg.SOURCE_SYSTEM_CLIENT_ID) <> IFF(pl.SOURCE_SYSTEM_CLIENT_ID IS NULL, -1, pl.SOURCE_SYSTEM_CLIENT_ID)
+          OR IFF(stg.SOURCE_SYSTEM_POLICY_ID IS NULL, -1, stg.SOURCE_SYSTEM_POLICY_ID) <> IFF(pl.SOURCE_SYSTEM_POLICY_ID IS NULL, -1, pl.SOURCE_SYSTEM_POLICY_ID)
+          OR IFF(stg.SOURCE_SYSTEM_ORIGINAL_POLICY_ID IS NULL, -1, stg.SOURCE_SYSTEM_ORIGINAL_POLICY_ID) <> IFF(pl.SOURCE_SYSTEM_ORIGINAL_POLICY_ID IS NULL, -1, pl.SOURCE_SYSTEM_ORIGINAL_POLICY_ID)
+          OR IFF(stg.SOURCE_SYSTEM_POLICY_TYPE_ID IS NULL, -1, stg.SOURCE_SYSTEM_POLICY_TYPE_ID) <> IFF(pl.SOURCE_SYSTEM_POLICY_TYPE_ID IS NULL, -1, pl.SOURCE_SYSTEM_POLICY_TYPE_ID)
+          OR IFF(stg.SOURCE_SYSTEM_LINE_TYPE_ID IS NULL, -1, stg.SOURCE_SYSTEM_LINE_TYPE_ID) <> IFF(pl.SOURCE_SYSTEM_LINE_TYPE_ID IS NULL, -1, pl.SOURCE_SYSTEM_LINE_TYPE_ID)
+          OR IFF(stg.SOURCE_SYSTEM_ISSUING_COMPANY_ID IS NULL, -1, stg.SOURCE_SYSTEM_ISSUING_COMPANY_ID) <> IFF(pl.SOURCE_SYSTEM_ISSUING_COMPANY_ID IS NULL, -1, pl.SOURCE_SYSTEM_ISSUING_COMPANY_ID)
+          OR IFF(stg.SOURCE_SYSTEM_BILLING_COMPANY_ID IS NULL, -1, stg.SOURCE_SYSTEM_BILLING_COMPANY_ID) <> IFF(pl.SOURCE_SYSTEM_BILLING_COMPANY_ID IS NULL, -1, pl.SOURCE_SYSTEM_BILLING_COMPANY_ID)
+        );
+
+        UPDATE ALLIANT_DW.DBO.DW_CLIENT_BENCHMARKING_POLICY_LINE AS pl
+        SET DELETED_DATE = CURRENT_TIMESTAMP(),
+            DW_DATE_UPDATED = CURRENT_TIMESTAMP(),
+            DW_UPDATE_USER = 'spdw_dw_client_benchmarking_policy_line_insertUpdate'
+        WHERE pl.DELETED_DATE IS NULL
+          AND NOT EXISTS (
+            SELECT 1
+            FROM {{ ref('DBSHIFT', 'DW_CLIENT_BENCHMARKING_POLICY_LINE_STAGING') }} AS stg
+            WHERE stg.SOURCE_SYSTEM_POLICY_LINE_ID = pl.SOURCE_SYSTEM_POLICY_LINE_ID
+        );
+      END;
+    preSQL: ""
+    testsEnabled: true
+    truncateBefore: true
+  database: ALLIANT_DW
+  deployEnabled: true
+  description: ""
+  isMultisource: false
+  locationName: DBSHIFT
+  materializationType: table
+  metadata:
+    appliedNodeTests: []
+    columns:
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: 59715568-d01f-444f-83a6-574a7b539cbe
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: DW_CLIENT_ID
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: 93853922-386f-40e8-ae96-fce1d2dd0f29
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.DW_CLIENT_ID
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: a63ed794-d2c7-4389-bdc9-c18d09819777
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: DW_CLIENT_MASTER_ID
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: 8b671a5c-750d-44a6-981c-d703fc2e505a
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.DW_CLIENT_MASTER_ID
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: 0f224cc9-5a12-4c22-b9b9-d352e8250280
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: DW_POLICY_ID
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: 47b19815-5e26-4071-87ab-f54452171c77
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.DW_POLICY_ID
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: 32062ca3-9ab9-425b-810a-2453676c5b57
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: DW_POLICY_LINE_ID
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: 0f2b2b1a-8285-452f-9174-c7ab21ca3d9c
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.DW_POLICY_LINE_ID
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: e8c67c5c-7a6b-4e1b-b789-f538356942ae
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: DW_STRUCTURE_ID
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: e34f07a0-2f95-4673-9524-1a9f1b95d10a
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.DW_STRUCTURE_ID
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: b138df13-8d02-45e0-8e10-388f6153926d
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: DW_COMPANY_ID_ISSUING
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: 5c91b5c4-54c7-4566-a61f-d5b4e8c56608
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.DW_COMPANY_ID_ISSUING
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: b5121e42-9f33-488f-a9b3-196b001a1c72
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: DW_COMPANY_ID_BILLING
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: f3178c77-4c3d-4c37-8e6d-74d3d758c0e6
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.DW_COMPANY_ID_BILLING
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: 320d7713-d023-4556-9d58-941910efc61a
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: DW_DATE_ID_EFFECTIVE_DATE
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: d123c8e4-8c88-460d-83b0-51c3243176b9
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.DW_DATE_ID_EFFECTIVE_DATE
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: 1982b610-8b98-4b71-aa31-e40df12d3345
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: DW_DATE_ID_EXPIRATION_DATE
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: 1a592476-c2ae-4c92-88f5-46f3325e6481
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.DW_DATE_ID_EXPIRATION_DATE
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: b1386782-b7e2-4bd5-a4b5-5d9c79fde612
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: POLICY_NUMBER
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: c822dd94-a169-42b7-a3fd-cd2460e6e232
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.POLICY_NUMBER
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: b57199c4-c2e3-448f-aa14-82a13bb0b4cc
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: POLICY_NAME
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: e89a818c-4876-4f4d-84f5-512c1b47b409
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.POLICY_NAME
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: d161099f-eb14-4eb9-a3b0-2b1d0337583f
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: POLICY_EFFECTIVE_DATE
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: 9c8b8772-e565-4f4c-9f69-70335e69e2c4
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.POLICY_EFFECTIVE_DATE
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: 32675660-dd58-450f-a72a-6098194488b0
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: POLICY_EXPIRATION_DATE
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: d1a0a552-8706-4447-aa72-886915152865
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.POLICY_EXPIRATION_DATE
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: 0f3c5553-d144-4dd2-83de-681b9597374b
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: POLICY_TYPE_CODE
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: 47b96615-5882-4dd2-bc2f-1a93e36e8b2b
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.POLICY_TYPE_CODE
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: e890a57e-f63b-4cd3-8f0a-15635f6e5229
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: POLICY_TYPE
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: a6de5420-569d-4876-8f37-142f1a6f8f74
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.POLICY_TYPE
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: f3d0a256-4277-4c4c-859a-5f07a6839d33
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: LINE_TYPE_CODE
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: 3b018b14-c13f-4e0e-941f-897ab89c2049
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.LINE_TYPE_CODE
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: f327a374-c3c1-4b13-a77b-60721c5b8b93
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: LINE_TYPE
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: 1d6eb758-c0b9-4796-9f89-9a2cf111f185
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.LINE_TYPE
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: a63e5283-e2e4-4d1a-be36-821f592a433a
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: LINE_STATUS_CODE
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: 8b736469-8043-4e6f-96a8-a6d123c50bb4
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.LINE_STATUS_CODE
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: e827d09a-6c0b-4235-857e-e51c8812c62c
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: BILLED_COMMISSION
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: f3172e2d-0b70-4f35-9856-42790938a166
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.BILLED_COMMISSION
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: b1349f2b-7c70-4384-9d58-947702656972
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: BILLED_PREMIUM
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: 0f2f7902-1818-47c0-85f0-51cd7e1933c2
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.BILLED_PREMIUM
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: f3338e5d-7521-4f1b-b384-1811566373b7
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: AGGREGATE_LIMIT_AMOUNT
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: 32a939f6-17a4-432d-88b0-a5445209ac4c
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.AGGREGATE_LIMIT_AMOUNT
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: 3226a200-a3e3-4613-81b8-e215f606e716
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: LIMIT_AMOUNT_PER_CLAIM
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: 978913b8-eb34-4537-ac0b-04424696c641
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.LIMIT_AMOUNT_PER_CLAIM
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: b17a5849-c439-444f-a035-15a0c8411d33
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: EXCESS_LAYER_NUMBER
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: b07cf3b2-650c-4389-9bd2-56456f913e61
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.EXCESS_LAYER_NUMBER
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: 1918a09f-eb1d-4447-aa72-8869f8c67990
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: RETENTION_AMOUNT
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: 1b241372-50b0-466d-8806-f63b21c43770
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.RETENTION_AMOUNT
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: d1999295-e24c-4a3d-a51c-8e0b6076de1b
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: SOURCE_SYSTEM_CLIENT_ID
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: 1546961c-6d81-4235-9c98-1e4334b07f87
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.SOURCE_SYSTEM_CLIENT_ID
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: d1875151-5121-4f11-9252-870a2b0c98f8
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: SOURCE_SYSTEM_POLICY_ID
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: f3b9000f-d5ed-4e92-a9b0-37740f9598a3
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.SOURCE_SYSTEM_POLICY_ID
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: b57e84c9-ca5e-4b08-bc23-640a2a4b8787
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: SOURCE_SYSTEM_POLICY_LINE_ID
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: 56c8022a-f998-4720-bdc7-874e50882e3b
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.SOURCE_SYSTEM_POLICY_LINE_ID
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: b17a5849-c439-4d08-a5be-9357d34d1b82
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: SOURCE_SYSTEM_POLICY_TYPE_ID
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: 474a275f-b98a-4467-8e6d-6fd21b8a929d
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.SOURCE_SYSTEM_POLICY_TYPE_ID
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: a63e5283-e2e4-4d1a-be36-821f592a433a
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: SOURCE_SYSTEM_LINE_TYPE_ID
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: a6b9d629-b636-4074-a63e-3240e322cd6a
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.SOURCE_SYSTEM_LINE_TYPE_ID
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: 32675660-dd58-4b47-a36c-2f9603099bba
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: SOURCE_SYSTEM_ISSUING_COMPANY_ID
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: 2f741c88-c0b9-470a-8532-613d5de1b9e2
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.SOURCE_SYSTEM_ISSUING_COMPANY_ID
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: 585c54c3-b3c9-45e8-bcf6-cc6e5a0e9140
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: SOURCE_SYSTEM_BILLING_COMPANY_ID
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: 26391a8e-5b12-421f-bc87-e23a63445474
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.SOURCE_SYSTEM_BILLING_COMPANY_ID
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: 1a81232e-dfc1-4b13-ab41-2a62e08e64c7
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: SOURCE_SYSTEM_ORIGINAL_POLICY_ID
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: 6d5e7a9e-01a3-4a6f-b44c-350711ed349d
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.SOURCE_SYSTEM_ORIGINAL_POLICY_ID
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: e82d790f-90e8-4674-897b-8919f187332c
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: UNKNOWN
+        description: ""
+        name: DW_SOURCE_SYSTEM_ID
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences:
+              - columnCounter: 1d444458-75fd-430c-87d2-06b23d9b4b9b
+                stepCounter: 11b95b4e-8f24-4114-8785-580a6b72a084
+            transform: stg.DW_SOURCE_SYSTEM_ID
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: 9e3f01fa-8a7e-4682-96c2-0746b149b1ca
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: TIMESTAMP_NTZ
+        description: ""
+        name: DW_DATE_CREATED
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences: []
+            transform: CURRENT_TIMESTAMP()
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: db7463f2-8951-409c-a128-444f23b2c2fd
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: VARCHAR
+        description: ""
+        name: DW_CREATE_USER
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences: []
+            transform: '''spdw_dw_client_benchmarking_policy_line_insertUpdate'''
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: 5c91ff30-c4e9-4481-9964-b89ed223b28b
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: TIMESTAMP_NTZ
+        description: ""
+        name: DW_DATE_UPDATED
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences: []
+            transform: CURRENT_TIMESTAMP()
+        transform: ""
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: 16d519b2-3fc4-47cd-96a2-944a30e87d0c
+          stepCounter: 53c15052-a58d-4226-9d33-4f938d8442a0
+        config: {}
+        dataType: VARCHAR
+        description: ""
+        name: DW_UPDATE_USER
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences: []
+            transform: '''spdw_dw_client_benchmarking_policy_line_insertUpdate'''
+        transform: ""
+    cteString: ""
+    enabledColumnTestIDs: []
+    sourceMapping:
+      - aliases:
+          DW_CLIENT_BENCHMARKING_POLICY_LINE: pl
+          DW_CLIENT_BENCHMARKING_POLICY_LINE_STAGING: stg
+        customSQL:
+          customSQL: ""
+        dependencies:
+          - locationName: DBSHIFT
+            nodeName: DW_CLIENT_BENCHMARKING_POLICY_LINE_STAGING
+          - locationName: DBSHIFT
+            nodeName: DW_CLIENT_BENCHMARKING_POLICY_LINE
+        join:
+          joinCondition: |-
+            FROM {{ ref('DBSHIFT', 'DW_CLIENT_BENCHMARKING_POLICY_LINE_STAGING') }} AS stg
+            LEFT JOIN {{ ref('DBSHIFT', 'DW_CLIENT_BENCHMARKING_POLICY_LINE') }} AS pl ON stg.SOURCE_SYSTEM_POLICY_LINE_ID = pl.SOURCE_SYSTEM_POLICY_LINE_ID
+            WHERE pl.SOURCE_SYSTEM_POLICY_LINE_ID IS NULL
+        name: DW_CLIENT_BENCHMARKING_POLICY_LINE_LOAD
+        noLinkRefs: []
+  name: DW_CLIENT_BENCHMARKING_POLICY_LINE
+  overrideSQL: false
+  schema: DBO
+  sqlType: Stage
+  type: sql
+  version: 1
+type: Node
