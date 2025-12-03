@@ -1,0 +1,192 @@
+fileVersion: 1
+id: 6e9b4e5a-2e3b-4c5d-8a1f-0b3c2d4e5f6a
+name: DBSHIFT_PSTG_NODE
+operation:
+  config:
+    insertStrategy: INSERT
+    postSQL: ""
+    preSQL: |-
+      BEGIN
+      USE DATABASE ALLIANT_DW_STAGE;
+      UPDATE ALLIANT_DW_STAGE.DBO.DW_CLIENT_BENCHMARKING_CLIENT_PROGRAM_STAGING STG
+      SET
+          STG.DW_CLIENT_BENCHMARKING_CLIENT_ID = SOURCE.NEW_DW_CLIENT_BENCHMARKING_CLIENT_ID,
+          STG.CLIENT_BENCHMARKING_PROGRAM_TYPE_ID = SOURCE.NEW_CLIENT_BENCHMARKING_PROGRAM_TYPE_ID,
+          STG.DW_COMPANY_ID_PRIMARY = SOURCE.NEW_DW_COMPANY_ID_PRIMARY,
+          STG.DW_COMPANY_ID_AGGREGATE = SOURCE.NEW_DW_COMPANY_ID_AGGREGATE,
+          STG.PRIMARY_LIMIT = SOURCE.NEW_PRIMARY_LIMIT,
+          STG.PRIMARY_PREMIUM = SOURCE.NEW_PRIMARY_PREMIUM,
+          STG.PRIMARY_SIR_RETENTION = SOURCE.NEW_PRIMARY_SIR_RETENTION,
+          STG.AGGREGATE_LIMIT = SOURCE.NEW_AGGREGATE_LIMIT,
+          STG.AGGREGATE_PREMIUM = SOURCE.NEW_AGGREGATE_PREMIUM,
+          STG.AGGREGATE_SIR_RETENTION = SOURCE.NEW_AGGREGATE_SIR_RETENTION
+      FROM (
+          SELECT
+              STG_INNER.SOURCE_SYSTEM_POLICY_LINE_ID,
+              IFNULL(CBC.DW_CLIENT_BENCHMARKING_CLIENT_ID, -1) AS NEW_DW_CLIENT_BENCHMARKING_CLIENT_ID,
+              IFNULL(PT.CLIENT_BENCHMARKING_PROGRAM_TYPE_ID, -1) AS NEW_CLIENT_BENCHMARKING_PROGRAM_TYPE_ID,
+              IFNULL(CP.DW_COMPANY_ID, -1) AS NEW_DW_COMPANY_ID_PRIMARY,
+              IFNULL(CA.DW_COMPANY_ID, -1) AS NEW_DW_COMPANY_ID_AGGREGATE,
+              NULLIF(TRY_TO_NUMBER(REPLACE(REPLACE(STG_INNER.SOURCE_SYSTEM_PRIMARY_LIMIT, '$', ''), ',', '')), 0) AS NEW_PRIMARY_LIMIT,
+              NULLIF(TRY_TO_NUMBER(REPLACE(REPLACE(STG_INNER.SOURCE_SYSTEM_PRIMARY_PREMIUM, '$', ''), ',', '')), 0) AS NEW_PRIMARY_PREMIUM,
+              NULLIF(TRY_TO_NUMBER(REPLACE(REPLACE(STG_INNER.SOURCE_SYSTEM_PRIMARY_SIR_RETENTION, '$', ''), ',', '')), 0) AS NEW_PRIMARY_SIR_RETENTION,
+              NULLIF(TRY_TO_NUMBER(REPLACE(REPLACE(STG_INNER.SOURCE_SYSTEM_AGGREGATE_LIMIT, '$', ''), ',', '')), 0) AS NEW_AGGREGATE_LIMIT,
+              NULLIF(TRY_TO_NUMBER(REPLACE(REPLACE(STG_INNER.SOURCE_SYSTEM_AGGREGATE_PREMIUM, '$', ''), ',', '')), 0) AS NEW_AGGREGATE_PREMIUM,
+              NULLIF(TRY_TO_NUMBER(REPLACE(REPLACE(STG_INNER.SOURCE_SYSTEM_AGGREGATE_SIR_RETENTION, '$', ''), ',', '')), 0) AS NEW_AGGREGATE_SIR_RETENTION
+          FROM ALLIANT_DW_STAGE.DBO.DW_CLIENT_BENCHMARKING_CLIENT_PROGRAM_STAGING STG_INNER
+          LEFT OUTER JOIN ALLIANT_DW.DBO.DW_CLIENT_BENCHMARKING_CLIENT CBC ON STG_INNER.SOURCE_SYSTEM_POLICY_LINE_ID = CBC.SOURCE_SYSTEM_POLICY_LINE_ID
+          LEFT OUTER JOIN ALLIANT_DW.REF.CLIENT_BENCHMARKING_PROGRAM_TYPE PT ON STG_INNER.PROGRAM_TYPE_KEY = PT.PROGRAM_TYPE_KEY
+          LEFT OUTER JOIN ALLIANT_DW.DBO.DW_COMPANY CP ON STG_INNER.PRIMARY_COMPANY_LOOKUP_CODE = CP.COMPANY_LOOKUPCODE
+          LEFT OUTER JOIN ALLIANT_DW.DBO.DW_COMPANY CA ON STG_INNER.AGGREGATE_COMPANY_LOOKUP_CODE = CA.COMPANY_LOOKUPCODE
+      ) AS SOURCE
+      WHERE STG.SOURCE_SYSTEM_POLICY_LINE_ID = SOURCE.SOURCE_SYSTEM_POLICY_LINE_ID;
+      END;
+    testsEnabled: true
+    truncateBefore: false
+  database: ""
+  deployEnabled: true
+  description: UPDATE-only conversion of spdw_dw_client_benchmarking_client_program_staging_update
+  isMultisource: false
+  locationName: DBSHIFT
+  materializationType: table
+  metadata:
+    appliedNodeTests: []
+    columns:
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d
+          stepCounter: 6e9b4e5a-2e3b-4c5d-8a1f-0b3c2d4e5f6a
+        config: {}
+        dataType: VARCHAR
+        description: ""
+        isPrimaryKey: true
+        name: DW_CLIENT_BENCHMARKING_CLIENT_PROGRAM_STAGING_KEY
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences: []
+            transform: ""
+        transform: "''"
+      - acceptedValues:
+          strictMatch: true
+          values: []
+        appliedColumnTests: {}
+        columnReference:
+          columnCounter: b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e
+          stepCounter: 6e9b4e5a-2e3b-4c5d-8a1f-0b3c2d4e5f6a
+        config: {}
+        dataType: NUMBER(38,0)
+        defaultValue: ""
+        description: ""
+        name: SYSTEM_VERSION
+        nullable: true
+        primaryKey: false
+        sourceColumnReferences:
+          - columnReferences: []
+            transform: ""
+        transform: "1"
+        uniqueKey: false
+      - acceptedValues:
+          strictMatch: true
+          values: []
+        appliedColumnTests: {}
+        columnReference:
+          columnCounter: c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f
+          stepCounter: 6e9b4e5a-2e3b-4c5d-8a1f-0b3c2d4e5f6a
+        config: {}
+        dataType: BOOLEAN
+        defaultValue: ""
+        description: ""
+        name: SYSTEM_CURRENT_FLAG
+        nullable: true
+        primaryKey: false
+        sourceColumnReferences:
+          - columnReferences: []
+            transform: ""
+        transform: "TRUE"
+        uniqueKey: false
+      - acceptedValues:
+          strictMatch: true
+          values: []
+        appliedColumnTests: {}
+        columnReference:
+          columnCounter: d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a
+          stepCounter: 6e9b4e5a-2e3b-4c5d-8a1f-0b3c2d4e5f6a
+        config: {}
+        dataType: TIMESTAMP_NTZ
+        defaultValue: ""
+        description: ""
+        name: SYSTEM_START_DATE
+        nullable: true
+        primaryKey: false
+        sourceColumnReferences:
+          - columnReferences: []
+            transform: ""
+        transform: CAST(CURRENT_TIMESTAMP AS TIMESTAMP)
+        uniqueKey: false
+      - acceptedValues:
+          strictMatch: true
+          values: []
+        appliedColumnTests: {}
+        columnReference:
+          columnCounter: e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9b
+          stepCounter: 6e9b4e5a-2e3b-4c5d-8a1f-0b3c2d4e5f6a
+        config: {}
+        dataType: TIMESTAMP_NTZ
+        defaultValue: ""
+        description: ""
+        name: SYSTEM_END_DATE
+        nullable: true
+        primaryKey: false
+        sourceColumnReferences:
+          - columnReferences: []
+            transform: ""
+        transform: CAST(NULL AS TIMESTAMP)
+        uniqueKey: false
+      - acceptedValues:
+          strictMatch: true
+          values: []
+        appliedColumnTests: {}
+        columnReference:
+          columnCounter: f6a7b8c9-d0e1-4f2a-3b4c-5d6e7f8a9b0c
+          stepCounter: 6e9b4e5a-2e3b-4c5d-8a1f-0b3c2d4e5f6a
+        config: {}
+        dataType: TIMESTAMP_NTZ
+        defaultValue: ""
+        description: ""
+        name: SYSTEM_CREATE_DATE
+        nullable: true
+        primaryKey: false
+        sourceColumnReferences:
+          - columnReferences: []
+            transform: ""
+        transform: CAST(CURRENT_TIMESTAMP AS TIMESTAMP)
+        uniqueKey: false
+      - acceptedValues:
+          strictMatch: true
+          values: []
+        appliedColumnTests: {}
+        columnReference:
+          columnCounter: a7b8c9d0-e1f2-4a3b-4c5d-6e7f8a9b0c1d
+          stepCounter: 6e9b4e5a-2e3b-4c5d-8a1f-0b3c2d4e5f6a
+        config: {}
+        dataType: TIMESTAMP_NTZ
+        defaultValue: ""
+        description: ""
+        name: SYSTEM_UPDATE_DATE
+        nullable: true
+        primaryKey: false
+        sourceColumnReferences:
+          - columnReferences: []
+            transform: ""
+        transform: CAST(CURRENT_TIMESTAMP AS TIMESTAMP)
+        uniqueKey: false
+    cteString: ""
+    enabledColumnTestIDs: []
+    sourceMapping: []
+  name: DBSHIFT_PSTG_NODE
+  overrideSQL: false
+  schema: ""
+  sqlType: persistentStage
+  type: sql
+  version: 1
+type: Node
